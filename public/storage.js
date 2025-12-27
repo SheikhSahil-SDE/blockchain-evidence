@@ -147,6 +147,38 @@ class Storage {
         }
     }
 
+    async createRegularUser(adminWallet, userData) {
+        try {
+            const response = await fetch(`${this.apiUrl}/users`, {
+                method: 'POST',
+                headers: this.headers,
+                body: JSON.stringify({
+                    wallet_address: userData.walletAddress,
+                    full_name: userData.fullName,
+                    role: userData.role,
+                    department: userData.department || 'General',
+                    jurisdiction: userData.jurisdiction || 'General',
+                    badge_number: userData.badgeNumber || '',
+                    account_type: 'real',
+                    created_by: adminWallet,
+                    is_active: true
+                })
+            });
+
+            if (response.ok) {
+                await this.logAdminAction(adminWallet, 'create_user', userData.walletAddress, {
+                    user_name: userData.fullName,
+                    role: userData.role
+                });
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error creating user:', error);
+            throw error;
+        }
+    }
+
     async createAdminUser(adminWallet, newAdminData) {
         try {
             // Verify the requesting user is actually an admin
