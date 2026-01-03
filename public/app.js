@@ -1,13 +1,32 @@
-// Clean Evidence Management System - Enhanced with Admin Management
+/**
+ * Clean Evidence Management System - Enhanced with Admin Management
+ * @fileoverview Main application logic for EVID-DGC blockchain evidence management system
+ * @author EVID-DGC Team
+ * @version 1.0.0
+ */
+
 /* global trackUserAction, trackEvent */
+
+/**
+ * Current user's wallet account address
+ * @type {string|null}
+ */
 let userAccount;
 
+/**
+ * Mapping of role numbers to human-readable role names
+ * @type {Object<number, string>}
+ */
 const roleNames = {
     1: 'Public Viewer', 2: 'Investigator', 3: 'Forensic Analyst',
     4: 'Legal Professional', 5: 'Court Official', 6: 'Evidence Manager',
     7: 'Auditor', 8: 'Administrator'
 };
 
+/**
+ * Mapping of role numbers to database role strings
+ * @type {Object<number, string>}
+ */
 const roleMapping = {
     1: 'public_viewer', 2: 'investigator', 3: 'forensic_analyst',
     4: 'legal_professional', 5: 'court_official', 6: 'evidence_manager',
@@ -59,7 +78,7 @@ async function initializeApp() {
     const connectBtn = document.getElementById('connectWallet');
     const regForm = document.getElementById('registrationForm');
     const dashBtn = document.getElementById('goToDashboard');
-    
+
     if (connectBtn) connectBtn.addEventListener('click', connectWallet);
     if (regForm) regForm.addEventListener('submit', handleRegistration);
     if (dashBtn) dashBtn.addEventListener('click', goToDashboard);
@@ -99,13 +118,27 @@ function initializeHamburgerMenu() {
 
 async function connectWallet() {
     try {
+        // Show loader
+        const loader = document.getElementById('loader');
+        const loaderMessage = document.getElementById('loaderMessage');
+        if (loader) loader.classList.remove('hidden');
+        if (loaderMessage) loaderMessage.classList.remove('hidden');
+
         showLoading(true);
 
         if (!window.ethereum) {
             userAccount = '0x1234567890123456789012345678901234567890';
+
+            // Artificial delay to show loader in demo mode
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
             updateWalletUI();
             await checkRegistrationStatus();
             showLoading(false);
+
+            // Hide loader
+            if (loader) loader.classList.add('hidden');
+            if (loaderMessage) loaderMessage.classList.add('hidden');
             return;
         }
 
@@ -114,17 +147,27 @@ async function connectWallet() {
         updateWalletUI();
         await checkRegistrationStatus();
         showLoading(false);
+
+        // Hide loader
+        if (loader) loader.classList.add('hidden');
+        if (loaderMessage) loaderMessage.classList.add('hidden');
     } catch (error) {
         showLoading(false);
         showAlert('Wallet connection failed', 'error');
     }
 }
 
+/**
+ * Update the wallet UI elements after successful connection
+ * Updates the wallet address display, shows wallet status section, and disables connect button
+ * @function updateWalletUI
+ * @returns {void}
+ */
 function updateWalletUI() {
     const walletAddr = document.getElementById('walletAddress');
     const walletStatus = document.getElementById('walletStatus');
     const connectBtn = document.getElementById('connectWallet');
-    
+
     if (walletAddr) walletAddr.textContent = userAccount;
     if (walletStatus) walletStatus.classList.remove('hidden');
     if (connectBtn) {
@@ -181,6 +224,14 @@ function showLoading(show) {
     document.getElementById('loadingModal')?.classList.toggle('active', show);
 }
 
+/**
+ * Display alert message to user
+ * Creates and displays a temporary alert message with specified type and styling
+ * @function showAlert
+ * @param {string} message - The message to display
+ * @param {string} type - The alert type ('success', 'error', 'info')
+ * @returns {void}
+ */
 function showAlert(message, type) {
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;

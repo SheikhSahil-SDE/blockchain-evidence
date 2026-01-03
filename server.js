@@ -205,7 +205,7 @@ const checkCasePermission = async (req, res, next) => {
 };
 
 // API Routes
-
+app.use("/api/auth", authRoutes);
 // Health check
 /**
  * @swagger
